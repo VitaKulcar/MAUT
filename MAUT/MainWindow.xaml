@@ -1,0 +1,141 @@
+﻿<Window x:Class="MAUT.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MAUT"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        mc:Ignorable="d"
+        Title="MAUT Kulčar Vita" Height="800" Width="1200" WindowState="Maximized">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="6*"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="6*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Column="1" Grid.Row="1" Name="topButtons">
+            <Button Content="naloži drevo" Click="loadTree" Margin="5"/>
+            <DockPanel Margin="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Name="parameterName" Grid.Column="0" Margin="5"/>
+                    <Button Content="dodaj parameter" Name="AddButton" Click="addParameter" Grid.Column="1" Margin="5"/>
+                </Grid>
+            </DockPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="2" VerticalAlignment="Center">
+            <StackPanel Margin="5">
+                <TextBlock Name="notifications"/>
+            </StackPanel>
+            <StackPanel Margin="5">
+                <TreeView Name="tree">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Name}"/>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="3" Name="bottomButtons">
+            <Button Content="shrani drevo" Click="saveTree"  Margin="5"/>
+            <Button Content="preveri pravilnost drevesa" Click="checkTree" Margin="5"/>
+            <Button Content="nadaljevanje" Click="stopTreeEditing" Margin="5"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Grid.RowSpan="5" x:Name="step2" VerticalAlignment="Center">
+            <TextBlock Text="Za vsak končni parameter določite funkcijo" Margin="5"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Margin="5">
+                    <DataGrid x:Name="utilityFunctionTable" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ime parametra" Binding="{Binding Name}" Width="130"/>
+                            <DataGridTemplateColumn Header="domena" Width="180">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                                <TextBlock Text="OD "/>
+                                                <TextBox Name="textFrom" Width="50" TextChanged="domainChanged"/>
+                                                <TextBlock Text=" DO "/>
+                                                <TextBox Name="textTo" Width="50" TextChanged="domainChanged"/>
+                                                </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="izbira funkcije" Width="180">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox SelectionChanged="selectedFunctionChanged" Name="selectedFunction" SelectedItem="{Binding SelectedFunction}">
+                                            <ComboBoxItem Content="linearna"/>
+                                            <ComboBoxItem Content="eksponentna"/>
+                                            <ComboBoxItem Content="padajoča eksponentna"/>
+                                            <ComboBoxItem Content="logaritemska"/>
+                                            <ComboBoxItem Content="padajoča logaritemska"/>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+                <DockPanel Width="300" Height="200">
+                    <oxy:PlotView Name="plotView"/>
+                </DockPanel>
+            </StackPanel>
+            <StackPanel Margin="5">
+                <TextBlock Text="Za vsak nadredni parameter določite uteži podrednih parametrov" Margin="5"/>
+                <StackPanel>
+                    <ListBox x:Name="weightsForSuperiorParameters">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" Name="weightsTextBox"/>
+                                    <ListBox ItemsSource="{Binding Children}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Width="100" Text="{Binding Key}"/>
+                                                    <TextBox Width="50" LostFocus="TextBox_LostFocus"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+                <Button Content="naprej" Click="stopParameterEditing" Margin="5" Width="100" HorizontalAlignment="Right"/>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Grid.RowSpan="5" x:Name="step3" VerticalAlignment="Center">
+            <TextBlock Text="ALTERNATIVE" Margin="5"/>
+            <Button Content="dodaj alternativo" Click="addAlternative" Margin="5" Width="100" HorizontalAlignment="Right"/>
+            <TextBlock Text="Vrednosti alternativ" Margin="5"/>
+            <DataGrid Name="alternativesValuesTable" AutoGenerateColumns="False"/>
+            <TextBlock Text="Končne koristnosti alternativ" Margin="5"/>
+            <DataGrid Name="alternativesTable" AutoGenerateColumns="False"/>
+            <DockPanel Width="300" Height="300">
+                <oxy:PlotView Name="finalUtility"/>
+            </DockPanel>
+        </StackPanel>
+    </Grid>
+</Window>
